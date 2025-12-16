@@ -4,7 +4,7 @@ export default function Page() {
   return (
     <Layout>
       <h1 className="text-black">
-        Product Category
+        Product
       </h1>
     </Layout>
   )
