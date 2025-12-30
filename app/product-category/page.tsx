@@ -1,10 +1,12 @@
+"use client"
+
 import Layout from "@/components/ui/Layout";
 import { service } from '@/services/services';
 import React, { useEffect } from 'react';
 
 export default function Page() {
   const getData = async () => {
-    const response = await service('product-category');
+    const response = await service('categories');
     console.log(response);
   };
 
