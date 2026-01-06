@@ -4,6 +4,8 @@ import Layout from "@/components/ui/Layout";
 import { service } from "@/services/services";
 import React, { useEffect, useState } from "react";
 import { DataGrid, GridRowsProp, GridColDef } from "@mui/x-data-grid";
+import Button from '@mui/material/Button';
+import Link from "next/link";
 
 const rows: GridRowsProp = [
   { id: 1, name: "Data Grid", description: "the Community version" },
@@ -32,7 +34,16 @@ export default function Page() {
 
   return (
     <Layout>
-      <h1 className="text-black">Product Category</h1>
+      <div className="flex w-full justify-between items-center my-4">
+        <div className="">
+          <h1 className="text-black font-bold">Product Category</h1>
+        </div>
+        <div className="">
+          <Link href="/product-category/create">
+            <Button variant="contained">Add New</Button>
+          </Link>
+        </div>
+      </div>
       <div style={{ height: 300, width: "100%" }}>
         <DataGrid rows={rows} columns={columns} />
       </div>
