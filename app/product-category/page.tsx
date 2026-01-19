@@ -1,52 +1,128 @@
-"use client";
+'use client';
 
-import Layout from "@/components/ui/Layout";
-import { service } from "@/services/services";
-import React, { useEffect, useState } from "react";
-import { DataGrid, GridRowsProp, GridColDef } from "@mui/x-data-grid";
-import Button from '@mui/material/Button';
-import Link from "next/link";
-
-const rows: GridRowsProp = [
-  { id: 1, name: "Data Grid", description: "the Community version" },
-  { id: 2, name: "Data Grid Pro", description: "the Pro version" },
-  { id: 3, name: "Data Grid Premium", description: "the Premium version" },
-];
-
-const columns: GridColDef[] = [
-  { field: "name", headerName: "Product Name", width: 200 },
-  { field: "description", headerName: "Description", width: 300 },
-];
+import Layout from '@/components/ui/Layout';
+import { service } from '@/services/services';
+import React, { useEffect, useState, useMemo } from 'react';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { Button, IconButton } from '@mui/material';
+import { toast } from 'react-toastify';
+import RefreshIcon from '@mui/icons-material/Refresh'; // jalan / install terlebih dahulu: npm install @mui/icons-material
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import ConfirmDelete from '@/components/ui/ConfirmDelete';
+import { ProductCategoryType } from '@/services/data-types/product-category-type';
+import Link from 'next/link';
 
 export default function Page() {
-  const [rows, setRows] = useState<any>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [rows, setRows] = useState<ProductCategoryType[]>([]);
+  const apiEndpoint = 'categories';
+
+  // State for deletion
+  const [open, setOpen] = useState(false);
+  const [selectedDelete, setSelectedDelete] = useState({
+    id: '',
+    name: '',
+  });
+
+  const handleClickOpen = (id: string, name: string) => {
+    setSelectedDelete({ id, name });
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedDelete({ id: '', name: '' });
+  };
+
   const getData = async () => {
-    const response = await service("categories");
-    if (!response.error) {
-      setRows(response.data);
+    setIsLoading(true);
+    try {
+      const response = await service(apiEndpoint);
+      if (!response.error) {
+        setRows(response.data);
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Something went wrong';
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
     }
-    console.log(response);
   };
 
   useEffect(() => {
     getData();
   }, []);
 
+  const columns: GridColDef[] = useMemo(
+    () => [
+      { field: 'name', headerName: 'Product Name', width: 200 },
+      { field: 'description', headerName: 'Description', width: 300 },
+      {
+        field: 'action',
+        headerName: 'Action',
+        renderCell: (params) => (
+          <>
+            <Link href={`/product-category/edit/${params.row.id}`}>
+              <IconButton size="small">
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Link>
+            <IconButton
+              size="small"
+              onClick={() => handleClickOpen(params.row.id, params.row.name)}
+            >
+              <DeleteOutlineIcon fontSize="small" color="error" />
+            </IconButton>
+          </>
+        ),
+      },
+    ],
+    []
+  );
+
   return (
     <Layout>
       <div className="flex w-full justify-between items-center my-4">
-        <div className="">
-          <h1 className="text-black font-bold">Product Category</h1>
-        </div>
-        <div className="">
-          <Link href="/product-category/create">
-            <Button variant="contained">Add New</Button>
-          </Link>
-        </div>
+        <h1 className="text-black text-2xl font-bold">Product Category</h1>
+        <Link href="/product-category/create">
+          <Button variant="contained">Add New</Button>
+        </Link>
       </div>
-      <div style={{ height: 300, width: "100%" }}>
-        <DataGrid rows={rows} columns={columns} />
+
+      <div style={{ minHeight: 400, width: '100%' }}>
+        <div className="flex justify-end mb-2">
+          <IconButton
+            onClick={getData}
+            disabled={isLoading}
+            aria-label="refresh"
+          >
+            <RefreshIcon />
+          </IconButton>
+        </div>
+        <DataGrid
+          loading={isLoading}
+          rows={rows}
+          columns={columns}
+          autoHeight
+          pageSizeOptions={[5, 10, 25]}
+          initialState={{
+            pagination: {
+              paginationModel: { pageSize: 10 },
+            },
+          }}
+        />
       </div>
+
+      <ConfirmDelete
+        isOpen={open}
+        onClose={handleClose}
+        hrefDelete={apiEndpoint}
+        id={selectedDelete.id}
+        name={selectedDelete.name}
+        refresh={getData}
+      />
     </Layout>
   );
 }

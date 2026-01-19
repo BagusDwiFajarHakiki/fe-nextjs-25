@@ -69,7 +69,7 @@ export async function serviceUpdate(
   });
 }
 
-export async function serviceDestroy(params: string, id: string) {
+export async function serviceDestroy(params: string, id: string | number) {
   const url = `${ROOT_API}/${API_VERSION}/${params}/${id}`;
 
   return callAPI({

@@ -1,22 +1,48 @@
 "use client";
 
 import Layout from "@/components/ui/Layout";
-import { serviceStore } from "@/services/services";
+import { serviceShow, serviceUpdate } from "@/services/services";
 import { Button, TextField } from "@mui/material";
-import React, { useState } from "react";
-import { toast } from "react-toastify"; // jalan / install terlebih dahulu: npm install react-toastify, tambahkan <ToastContainer /> pada app/layout.tsx
+import React, { useCallback, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
-export default function ProductCategoryCreate() {
+export default function ProductCategoryEdit() {
   const [isLoading, setIsLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const [isError, setIsError] = useState<Record<string, boolean>>({});
+  const [formValues, setFormValues] = useState({
+    name: "",
+    description: "",
+  });
 
   const router = useRouter();
+  const params = useParams();
+  const id = params.id as string;
+
+  const getProductCategory = useCallback(async () => {
+    setFetching(true);
+    const response = await serviceShow("categories", id);
+    if (!response.error) {
+      setFormValues({
+        name: response.data.name,
+        description: response.data.description || "",
+      });
+    } else {
+      toast.error(response.message);
+    }
+    setFetching(false);
+  }, [id]);
+
+  useEffect(() => {
+    getProductCategory();
+  }, [getProductCategory]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setIsError((prevError) => ({ ...prevError, [name]: false }));
+    setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -25,7 +51,7 @@ export default function ProductCategoryCreate() {
     try {
       const submitData = new FormData(e.currentTarget);
 
-      const response = await serviceStore("categories", submitData);
+      const response = await serviceUpdate("categories", submitData, id);
       if (response.error) {
         if (response.message == "Token has expired") {
           Cookies.remove("token");
@@ -55,9 +81,19 @@ export default function ProductCategoryCreate() {
     }
   };
 
+  if (fetching) {
+    return (
+      <Layout>
+        <div className="flex justify-center h-96">
+          <p className="text-black text-md font-bold text-center">Loading...</p>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
-      <h1 className="text-black text-2xl font-bold">Product Category Create</h1>
+      <h1 className="text-black text-2xl font-bold">Product Category Edit</h1>
       <form onSubmit={handleSubmit} className="w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
           <TextField
@@ -67,6 +103,12 @@ export default function ProductCategoryCreate() {
             id="name"
             label="Name"
             variant="standard"
+            value={formValues.name}
+            slotProps={{
+              inputLabel: {
+                shrink: true,
+              },
+            }}
           />
           <TextField
             error={isError.description}
@@ -75,6 +117,12 @@ export default function ProductCategoryCreate() {
             id="description"
             label="Description"
             variant="standard"
+            value={formValues.description}
+            slotProps={{
+              inputLabel: {
+                shrink: true,
+              },
+            }}
           />
         </div>
         <div className="flex justify-end">
