@@ -10,19 +10,19 @@ import RefreshIcon from '@mui/icons-material/Refresh'; // jalan / install terleb
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ConfirmDelete from '@/components/ui/ConfirmDelete';
-import { ProductCategoryType } from '@/services/data-types/product-category-type';
+import { ProductVariantType } from '@/services/data-types/product-variant-type';
 import Link from 'next/link';
 
 export default function Page() {
   const [isLoading, setIsLoading] = useState(false);
-  const [rows, setRows] = useState<ProductCategoryType[]>([]);
+  const [rows, setRows] = useState<ProductVariantType[]>([]);
   const apiEndpoint = 'variants';
 
   // State for deletion
   const [open, setOpen] = useState(false);
   const [selectedDelete, setSelectedDelete] = useState({
-    id: '',
-    name: '',
+    id: "",
+    name: "",
   });
 
   const handleClickOpen = (id: string, name: string) => {
@@ -32,7 +32,7 @@ export default function Page() {
 
   const handleClose = () => {
     setOpen(false);
-    setSelectedDelete({ id: '', name: '' });
+    setSelectedDelete({ id: "", name: "" });
   };
 
   const getData = async () => {
@@ -58,8 +58,18 @@ export default function Page() {
   const columns: GridColDef[] = useMemo(
     () => [
       { field: 'id', headerName: 'Variant ID', width: 90 },
-      { field: 'product_category_id', headerName: 'Product Category ID', width: 160 },
-      { field: 'product_id', headerName: 'Product ID', width: 100 },
+      { 
+        field: 'product_category_id',
+        headerName: 'Category', 
+        width: 160,
+        renderCell: (params) => params.row.categories?.name || "_",
+      },
+      { 
+        field: 'product_id', 
+        headerName: 'Product', 
+        width: 100,
+        renderCell: (params) => params.row.products?.name || "_",
+      },
       { field: 'name', headerName: 'Product Name', width: 200 },
       { field: 'price', headerName: 'Price', width: 135 },
       { field: 'stock', headerName: 'Stock', width: 100 },

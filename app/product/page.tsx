@@ -1,28 +1,28 @@
-'use client';
+"use client";
 
-import Layout from '@/components/ui/Layout';
-import { service } from '@/services/services';
-import React, { useEffect, useState, useMemo } from 'react';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Button, IconButton } from '@mui/material';
-import { toast } from 'react-toastify';
-import RefreshIcon from '@mui/icons-material/Refresh'; // jalan / install terlebih dahulu: npm install @mui/icons-material
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import ConfirmDelete from '@/components/ui/ConfirmDelete';
-import { ProductCategoryType } from '@/services/data-types/product-category-type';
-import Link from 'next/link';
+import Layout from "@/components/ui/Layout";
+import { service } from "@/services/services";
+import React, { useEffect, useState, useMemo } from "react";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { Button, IconButton } from "@mui/material";
+import { toast } from "react-toastify";
+import RefreshIcon from "@mui/icons-material/Refresh"; // jalan / install terlebih dahulu: npm install @mui/icons-material
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import ConfirmDelete from "@/components/ui/ConfirmDelete";
+import { ProductType } from "@/services/data-types/product-type";
+import Link from "next/link";
 
 export default function Page() {
   const [isLoading, setIsLoading] = useState(false);
-  const [rows, setRows] = useState<ProductCategoryType[]>([]);
-  const apiEndpoint = 'products';
+  const [rows, setRows] = useState<ProductType[]>([]);
+  const apiEndpoint = "products";
 
   // State for deletion
   const [open, setOpen] = useState(false);
   const [selectedDelete, setSelectedDelete] = useState({
-    id: '',
-    name: '',
+    id: "",
+    name: "",
   });
 
   const handleClickOpen = (id: string, name: string) => {
@@ -32,7 +32,7 @@ export default function Page() {
 
   const handleClose = () => {
     setOpen(false);
-    setSelectedDelete({ id: '', name: '' });
+    setSelectedDelete({ id: "", name: "" });
   };
 
   const getData = async () => {
@@ -44,7 +44,7 @@ export default function Page() {
       }
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Something went wrong';
+        error instanceof Error ? error.message : "Something went wrong";
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -57,13 +57,18 @@ export default function Page() {
 
   const columns: GridColDef[] = useMemo(
     () => [
-      { field: 'id', headerName: 'Product ID', width: 90 },
-      { field: 'product_category_id', headerName: 'Product Category ID', width: 150 },
-      { field: 'name', headerName: 'Product Name', width: 245 },
-      { field: 'description', headerName: 'Description', width: 300 },
+      { field: "id", headerName: "Product ID", width: 90 },
       {
-        field: 'action',
-        headerName: 'Action',
+        field: "category_name",
+        headerName: "Category",
+        width: 150,
+        renderCell: (params) => params.row.categories?.name || "-",
+      },
+      { field: "name", headerName: "Product Name", width: 245 },
+      { field: "description", headerName: "Description", width: 300 },
+      {
+        field: "action",
+        headerName: "Action",
         renderCell: (params) => (
           <>
             <Link href={`/product/edit/${params.row.id}`}>
@@ -81,7 +86,7 @@ export default function Page() {
         ),
       },
     ],
-    []
+    [],
   );
 
   return (
@@ -93,7 +98,7 @@ export default function Page() {
         </Link>
       </div>
 
-      <div style={{ minHeight: 400, width: '100%' }}>
+      <div style={{ minHeight: 400, width: "100%" }}>
         <div className="flex justify-end mb-2">
           <IconButton
             onClick={getData}
