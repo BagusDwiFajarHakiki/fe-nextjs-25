@@ -1,18 +1,30 @@
 "use client";
 
 import Layout from "@/components/ui/Layout";
-import { serviceStore } from "@/services/services";
-import { Button, TextField } from "@mui/material";
-import React, { useState } from "react";
+import { service, serviceStore } from "@/services/services";
+import { Button, MenuItem, TextField } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { ProductCategoryType } from "@/services/data-types/product-category-type";
 import { toast } from "react-toastify"; // jalan / install terlebih dahulu: npm install react-toastify, tambahkan <ToastContainer /> pada app/layout.tsx
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 
-export default function ProductCategoryCreate() {
+export default function ProductCreate() {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState<Record<string, boolean>>({});
+  const [categories, setCategories] = useState<ProductCategoryType[]>([]);
 
   const router = useRouter();
+
+  useEffect(() => {
+    const getCategories = async () => {
+      const response = await service("categories");
+      if (!response.error) {
+        setCategories(response.data);
+      }
+    };
+    getCategories();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -61,13 +73,24 @@ export default function ProductCategoryCreate() {
       <form onSubmit={handleSubmit} className="w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
           <TextField
+            select
             error={isError.product_category_id}
             onChange={handleChange}
             name="product_category_id"
             id="product_category_id"
-            label="Product Category ID"
+            label="Product Category"
             variant="standard"
-          />
+            defaultValue=""
+            SelectProps={{
+              native: false,
+            }}
+          >
+            {categories.map((option) => (
+              <MenuItem key={option.id} value={option.id}>
+                {option.name}
+              </MenuItem>
+            ))}
+          </TextField>
           <TextField
             error={isError.name}
             onChange={handleChange}

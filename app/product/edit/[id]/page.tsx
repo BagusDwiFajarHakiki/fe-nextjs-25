@@ -1,17 +1,19 @@
 "use client";
 
 import Layout from "@/components/ui/Layout";
-import { serviceShow, serviceUpdate } from "@/services/services";
-import { Button, TextField } from "@mui/material";
+import { service, serviceShow, serviceUpdate } from "@/services/services";
+import { Button, MenuItem, TextField } from "@mui/material";
 import React, { useCallback, useEffect, useState } from "react";
+import { ProductCategoryType } from "@/services/data-types/product-category-type";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 import { useParams, useRouter } from "next/navigation";
 
-export default function ProductCategoryEdit() {
+export default function ProductEdit() {
   const [isLoading, setIsLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [isError, setIsError] = useState<Record<string, boolean>>({});
+  const [categories, setCategories] = useState<ProductCategoryType[]>([]);
   const [formValues, setFormValues] = useState({
     product_category_id: "",
     name: "",
@@ -22,7 +24,7 @@ export default function ProductCategoryEdit() {
   const params = useParams();
   const id = params.id as string;
 
-  const getProductCategory = useCallback(async () => {
+  const getProduct = useCallback(async () => {
     setFetching(true);
     const response = await serviceShow("products", id);
     if (!response.error) {
@@ -38,8 +40,15 @@ export default function ProductCategoryEdit() {
   }, [id]);
 
   useEffect(() => {
-    getProductCategory();
-  }, [getProductCategory]);
+    const getCategories = async () => {
+      const response = await service("categories");
+      if (!response.error) {
+        setCategories(response.data);
+      }
+    };
+    getCategories();
+    getProduct();
+  }, [getProduct]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -99,6 +108,7 @@ export default function ProductCategoryEdit() {
       <form onSubmit={handleSubmit} className="w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
           <TextField
+            select
             error={isError.product_category_id}
             onChange={handleChange}
             name="product_category_id"
@@ -110,8 +120,17 @@ export default function ProductCategoryEdit() {
               inputLabel: {
                 shrink: true,
               },
+              select: {
+                native: false,
+              },
             }}
-          />
+          >
+            {categories.map((option) => (
+              <MenuItem key={option.id} value={option.id}>
+                {option.name}
+              </MenuItem>
+            ))}
+          </TextField>
           <TextField
             error={isError.name}
             onChange={handleChange}
