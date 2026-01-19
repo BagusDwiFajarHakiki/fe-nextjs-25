@@ -51,7 +51,7 @@ export default async function callAPI({
   const { length } = Object.keys(response.data);
   const res = {
     error: false,
-    message: 'success',
+    message: response.data.message || 'success',
     data: length > 2 ? response.data : response.data.data,
   };
 

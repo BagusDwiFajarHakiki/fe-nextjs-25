@@ -69,7 +69,7 @@ export default function ProductCategoryEdit() {
           }
         }
       } else {
-        toast.success(response.data?.message ?? "Success");
+        toast.success(response.message);
         router.push("/product-category");
       }
     } catch (error) {
