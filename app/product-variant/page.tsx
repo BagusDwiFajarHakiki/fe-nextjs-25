@@ -1,22 +1,24 @@
-'use client';
+"use client";
 
-import Layout from '@/components/ui/Layout';
-import { service } from '@/services/services';
-import React, { useEffect, useState, useMemo } from 'react';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Button, IconButton } from '@mui/material';
-import { toast } from 'react-toastify';
-import RefreshIcon from '@mui/icons-material/Refresh'; // jalan / install terlebih dahulu: npm install @mui/icons-material
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import ConfirmDelete from '@/components/ui/ConfirmDelete';
-import { ProductVariantType } from '@/services/data-types/product-variant-type';
-import Link from 'next/link';
+import Layout from "@/components/ui/Layout";
+import { service } from "@/services/services";
+import React, { useEffect, useState, useMemo } from "react";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { Button, IconButton } from "@mui/material";
+import Cookies from "js-cookie";
+import { toast } from "react-toastify";
+import RefreshIcon from "@mui/icons-material/Refresh"; // jalan / install terlebih dahulu: npm install @mui/icons-material
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import ConfirmDelete from "@/components/ui/ConfirmDelete";
+import { ProductVariantType } from "@/services/data-types/product-variant-type";
+import Link from "next/link";
 
 export default function Page() {
   const [isLoading, setIsLoading] = useState(false);
   const [rows, setRows] = useState<ProductVariantType[]>([]);
-  const apiEndpoint = 'variants';
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const apiEndpoint = "variants";
 
   // State for deletion
   const [open, setOpen] = useState(false);
@@ -44,7 +46,7 @@ export default function Page() {
       }
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Something went wrong';
+        error instanceof Error ? error.message : "Something went wrong";
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -52,30 +54,34 @@ export default function Page() {
   };
 
   useEffect(() => {
-    getData();
+    const token = Cookies.get("token");
+    if (token) {
+      setIsLoggedIn(true);
+      getData();
+    }
   }, []);
 
   const columns: GridColDef[] = useMemo(
     () => [
-      { field: 'id', headerName: 'Variant ID', width: 90 },
-      { 
-        field: 'product_category_id',
-        headerName: 'Category', 
+      { field: "id", headerName: "Variant ID", width: 90 },
+      {
+        field: "product_category_id",
+        headerName: "Category",
         width: 160,
         renderCell: (params) => params.row.categories?.name || "_",
       },
-      { 
-        field: 'product_id', 
-        headerName: 'Product', 
+      {
+        field: "product_id",
+        headerName: "Product",
         width: 100,
         renderCell: (params) => params.row.products?.name || "_",
       },
-      { field: 'name', headerName: 'Product Name', width: 200 },
-      { field: 'price', headerName: 'Price', width: 135 },
-      { field: 'stock', headerName: 'Stock', width: 100 },
+      { field: "name", headerName: "Product Name", width: 200 },
+      { field: "price", headerName: "Price", width: 135 },
+      { field: "stock", headerName: "Stock", width: 100 },
       {
-        field: 'action',
-        headerName: 'Action',
+        field: "action",
+        headerName: "Action",
         renderCell: (params) => (
           <>
             <Link href={`/product-variant/edit/${params.row.id}`}>
@@ -93,19 +99,21 @@ export default function Page() {
         ),
       },
     ],
-    []
+    [],
   );
 
   return (
     <Layout>
       <div className="flex w-full justify-between items-center my-4">
         <h1 className="text-black text-2xl font-bold">Product Variant</h1>
-        <Link href="/product-variant/create">
-          <Button variant="contained">Add New</Button>
-        </Link>
+        {isLoggedIn && (
+          <Link href="/product-variant/create">
+            <Button variant="contained">Add New</Button>
+          </Link>
+        )}
       </div>
 
-      <div style={{ minHeight: 400, width: '100%' }}>
+      <div style={{ minHeight: 400, width: "100%" }}>
         <div className="flex justify-end mb-2">
           <IconButton
             onClick={getData}

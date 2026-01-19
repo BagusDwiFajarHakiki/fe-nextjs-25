@@ -5,6 +5,7 @@ import { service } from "@/services/services";
 import React, { useEffect, useState, useMemo } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { Button, IconButton } from "@mui/material";
+import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 import RefreshIcon from "@mui/icons-material/Refresh"; // jalan / install terlebih dahulu: npm install @mui/icons-material
 import EditIcon from "@mui/icons-material/Edit";
@@ -16,6 +17,7 @@ import Link from "next/link";
 export default function Page() {
   const [isLoading, setIsLoading] = useState(false);
   const [rows, setRows] = useState<ProductType[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const apiEndpoint = "products";
 
   // State for deletion
@@ -52,7 +54,11 @@ export default function Page() {
   };
 
   useEffect(() => {
-    getData();
+    const token = Cookies.get("token");
+    if (token) {
+      setIsLoggedIn(true);
+      getData();
+    }
   }, []);
 
   const columns: GridColDef[] = useMemo(
@@ -93,9 +99,11 @@ export default function Page() {
     <Layout>
       <div className="flex w-full justify-between items-center my-4">
         <h1 className="text-black text-2xl font-bold">Product</h1>
-        <Link href="/product/create">
-          <Button variant="contained">Add New</Button>
-        </Link>
+        {isLoggedIn && (
+          <Link href="/product/create">
+            <Button variant="contained">Add New</Button>
+          </Link>
+        )}
       </div>
 
       <div style={{ minHeight: 400, width: "100%" }}>

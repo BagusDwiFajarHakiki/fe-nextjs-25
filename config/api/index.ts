@@ -23,9 +23,9 @@ export default async function callAPI({
   } else if (token) {
     const tokenCookies = Cookies.get('token');
     if (tokenCookies) {
-      const jwtToken = atob(tokenCookies);
+      const tokenDecoded = atob(tokenCookies);
       headers = {
-        Authorization: `Bearer ${jwtToken}`,
+        Authorization: `Bearer ${tokenDecoded}`,
       };
     }
   }
@@ -42,7 +42,7 @@ export default async function callAPI({
   if (response.status > 300) {
     const res = {
       error: true,
-      message: response.data.message,
+      message: response.data.message || response.data,
       data: null,
     };
     return res;
