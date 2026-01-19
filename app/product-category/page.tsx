@@ -57,8 +57,9 @@ export default function Page() {
 
   const columns: GridColDef[] = useMemo(
     () => [
-      { field: 'name', headerName: 'Product Name', width: 200 },
-      { field: 'description', headerName: 'Description', width: 300 },
+      { field: 'id', headerName: 'Product Category ID', width: 150 },
+      { field: 'name', headerName: 'Product Name', width: 235 },
+      { field: 'description', headerName: 'Description', width: 400 },
       {
         field: 'action',
         headerName: 'Action',
